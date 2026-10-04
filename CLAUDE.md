@@ -61,8 +61,8 @@ answer given in chat is written back into the issue body before acting on it.
   and a sub-issue's ticket or PR never mentions closing its parent: they say
   `Part of #NN` (#76 closed #1 with four levels still open, #84).
 - **The board is the handoff baton**: the Status field of the "Starquake
-  Recompiled" user Project
-  (https://github.com/users/starquake/projects/5). Read and move it with
+  Recompiled" org Project
+  (https://github.com/orgs/zx-recompiled/projects/1). Read and move it with
   `.claude/scripts/board.sh`.
 
   ```

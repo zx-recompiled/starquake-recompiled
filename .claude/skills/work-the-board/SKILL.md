@@ -73,10 +73,10 @@ found and let the maintainer confirm the shape first.
   automation, and when it breaks nothing announces it:
 
   ```bash
-  gh api graphql -f query='{ user(login:"starquake"){ projectV2(number:5){ items(first:100){ nodes{
+  gh api graphql -f query='{ organization(login:"zx-recompiled"){ projectV2(number:1){ items(first:100){ nodes{
     content{ ... on Issue { number state } }
     fieldValueByName(name:"Status"){ ... on ProjectV2ItemFieldSingleSelectValue { name } }
-  }}}}}' --jq '.data.user.projectV2.items.nodes[]
+  }}}}}' --jq '.data.organization.projectV2.items.nodes[]
     | select(.content.number != null) | select(.content.state=="CLOSED")
     | select(.fieldValueByName.name != "Done") | .content.number'
   ```
@@ -208,11 +208,11 @@ comment to "pick up the next one", which means the **top** card. Read the
 order through the API; the position sort is what the board shows:
 
 ```bash
-gh api graphql -f query='{ user(login:"starquake"){ projectV2(number:5){
+gh api graphql -f query='{ organization(login:"zx-recompiled"){ projectV2(number:1){
   items(first:100, orderBy:{field:POSITION, direction:ASC}){ nodes{
     content{ ... on Issue { number title } }
     fieldValueByName(name:"Status"){ ... on ProjectV2ItemFieldSingleSelectValue { name } } } } } } }' \
-  --jq '[.data.user.projectV2.items.nodes[] | select(.fieldValueByName.name=="Backlog")][0].content'
+  --jq '[.data.organization.projectV2.items.nodes[] | select(.fieldValueByName.name=="Backlog")][0].content'
 ```
 
 Picking it up follows its route label: `needs: build` goes to `Build`,
@@ -290,12 +290,12 @@ set -o pipefail
 R=zx-recompiled/starquake-recompiled
 since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 SELF="${BOARD_SELF_SET_FILE:-${TMPDIR:-/tmp}/starquake-board-selfset}"
-GQ='{ user(login:"starquake"){ projectV2(number:5){ items(first:100){ nodes{
+GQ='{ organization(login:"zx-recompiled"){ projectV2(number:1){ items(first:100){ nodes{
   content{ ... on Issue { number } }
   fieldValueByName(name:"Status"){ ... on ProjectV2ItemFieldSingleSelectValue { name } }
 }}}}}'
 # No `|| true` on a snapshot: a failed call must FAIL so the diff is skipped.
-snap_board(){ gh api graphql -f query="$GQ" --jq '.data.user.projectV2.items.nodes[]
+snap_board(){ gh api graphql -f query="$GQ" --jq '.data.organization.projectV2.items.nodes[]
   | select(.content.number != null) | "\(.content.number)|\(.fieldValueByName.name // "none")"' 2>/dev/null | sort -n; }
 snap_label(){ gh pr list -R $R --state open --label "$1" --json number -q '.[].number' 2>/dev/null | sort; }
 snap_hold(){ gh issue list -R $R --state open --label hold --json number -q '.[].number' 2>/dev/null | sort; }

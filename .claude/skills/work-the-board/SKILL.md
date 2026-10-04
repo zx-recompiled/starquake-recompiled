@@ -287,7 +287,7 @@ real miss on mediumrogue.
 # pipefail is LOAD-BEARING: every snapshot ends in `| sort`, and without it a
 # failed `gh` returns 0 with no output, so every guard silently passes.
 set -o pipefail
-R=starquake/starquake-recompiled
+R=zx-recompiled/starquake-recompiled
 since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 SELF="${BOARD_SELF_SET_FILE:-${TMPDIR:-/tmp}/starquake-board-selfset}"
 GQ='{ user(login:"starquake"){ projectV2(number:5){ items(first:100){ nodes{

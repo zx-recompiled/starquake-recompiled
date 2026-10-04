@@ -193,4 +193,4 @@ License (LICENSE-Inter.txt).
 Anthropic's AI assistant, wrote it. The source code, and a fuller
 account of how it was made, are at:
 
-  https://github.com/starquake/starquake-recompiled
+  https://github.com/zx-recompiled/starquake-recompiled

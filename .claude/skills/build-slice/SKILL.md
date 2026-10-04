@@ -119,7 +119,7 @@ attribution line, says what is wrong, gives the recommended fix, and ends
 with the three words the maintainer can reply with:
 
 ```bash
-gh api repos/starquake/starquake-recompiled/pulls/<n>/comments \
+gh api repos/zx-recompiled/starquake-recompiled/pulls/<n>/comments \
   -f commit_id="$(git rev-parse HEAD)" -f path=<file> -F line=<line> -f side=RIGHT \
   -f body="$(cat finding.md)"
 ```
@@ -137,7 +137,7 @@ conversation is unresolved**, so a thread left open holds the PR. Resolving
 takes the thread's node id:
 
 ```bash
-gh api graphql -f query='{ repository(owner:"starquake", name:"starquake-recompiled") {
+gh api graphql -f query='{ repository(owner:"zx-recompiled", name:"starquake-recompiled") {
   pullRequest(number:<n>) { reviewThreads(first:50) { nodes { id isResolved
     comments(first:1) { nodes { databaseId } } } } } } }'
 gh api graphql -f query='mutation { resolveReviewThread(input:{threadId:"<id>"}) { thread { isResolved } } }'
@@ -165,7 +165,7 @@ the maintainer's replies are part of the review.
   is ticked. If any box is still open, including one that's the maintainer's,
   the PR body must say `Part of #NN`, not `Closes #NN`; fix it now.
 - **Check the ticket's sub-issues too** before writing `Closes #NN`:
-  `gh api repos/starquake/starquake-recompiled/issues/<n>/sub_issues -q '.[] | select(.state=="open") | .number'`.
+  `gh api repos/zx-recompiled/starquake-recompiled/issues/<n>/sub_issues -q '.[] | select(.state=="open") | .number'`.
   Any still open (other than ones this PR closes) means `Part of #NN`: PR #76
   closed #1, the guidance levels' parent, with four still open (#84). A PR for
   a sub-issue says `Closes` only for that sub-issue, never for its parent.

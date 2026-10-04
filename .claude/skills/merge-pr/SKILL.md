@@ -45,7 +45,7 @@ A thread still open is a finding or a comment not yet acted on: act on it
 first (`build-slice`, *Review the whole diff*), or ask the maintainer.
 
 ```bash
-gh api graphql -f query='{ repository(owner:"starquake", name:"starquake-recompiled") {
+gh api graphql -f query='{ repository(owner:"zx-recompiled", name:"starquake-recompiled") {
   pullRequest(number:<n>) { reviewThreads(first:50) { nodes { isResolved path line } } } } }' \
   --jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved | not)]'
 ```

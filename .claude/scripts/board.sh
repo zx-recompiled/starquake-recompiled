@@ -17,9 +17,10 @@
 # Requires the `project` scope on the gh token.
 set -euo pipefail
 
+# The board is a USER project, while the repo belongs to the org: two owners.
 PROJECT_NUMBER=5
 PROJECT_OWNER=starquake
-PROJECT_REPO=starquake-recompiled
+REPO=zx-recompiled/starquake-recompiled
 PROJECT_ID="PVT_kwHOAA_wQM4BjSuM"
 STATUS_FIELD_ID="PVTSSF_lAHOAA_wQM4BjSuMzhiHmXE"
 
@@ -48,19 +49,31 @@ option_id() {
   printf '%s' "$id"
 }
 
+# Every item on the board as "number|item id|status", one per line, paged.
+#
+# Read from the PROJECT side: an issue in an org repo does not list a user
+# project under `issue.projectItems` (it comes back empty since the repo moved
+# to zx-recompiled, #137), so the issue cannot be asked for its own item.
+# Matching the repository too keeps another repo's issue of the same number out.
+items() {
+  gh api graphql --paginate -f query="query(\$endCursor: String){ user(login:\"$PROJECT_OWNER\"){
+        projectV2(number: $PROJECT_NUMBER){ items(first:100, after: \$endCursor){
+          pageInfo{ hasNextPage endCursor }
+          nodes{ id content{ ... on Issue { number repository{ nameWithOwner } } }
+            fieldValueByName(name:\"Status\"){ ... on ProjectV2ItemFieldSingleSelectValue { name } } } } } } }" \
+    --jq ".data.user.projectV2.items.nodes[]
+          | select(.content.repository.nameWithOwner==\"$REPO\")
+          | \"\\(.content.number)|\\(.id)|\\(.fieldValueByName.name // \"(unset)\")\""
+}
+
 # Item id for an issue number, adding the issue to the project if it is missing
 # (a hand-filed issue may never have been added).
-#
-# Asks the ISSUE for its project items rather than listing the whole board:
-# `gh project item-list` is by far the most expensive GraphQL query here.
 item_id() {
   local issue="$1" id
-  id=$(gh api graphql -f query="{ repository(owner:\"$PROJECT_OWNER\", name:\"$PROJECT_REPO\"){
-        issue(number: $issue){ projectItems(first:10){ nodes{ id project{ number } } } } } }" \
-      --jq ".data.repository.issue.projectItems.nodes[] | select(.project.number==$PROJECT_NUMBER) | .id" 2>/dev/null | head -1)
+  id=$(items | awk -F'|' -v n="$issue" '$1==n { print $2; exit }')
   if [ -z "$id" ]; then
     id=$(gh project item-add "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" \
-          --url "https://github.com/$PROJECT_OWNER/$PROJECT_REPO/issues/$issue" \
+          --url "https://github.com/$REPO/issues/$issue" \
           --format json --jq .id)
   fi
   printf '%s' "$id"
@@ -81,18 +94,10 @@ case "${1:-}" in
     echo "#$issue -> $want"
     ;;
   get)
-    gh api graphql -f query="{ repository(owner:\"$PROJECT_OWNER\", name:\"$PROJECT_REPO\"){
-        issue(number: $2){ projectItems(first:10){ nodes{ project{ number }
-          fieldValueByName(name:\"Status\"){ ... on ProjectV2ItemFieldSingleSelectValue { name } } } } } } }" \
-      --jq ".data.repository.issue.projectItems.nodes[] | select(.project.number==$PROJECT_NUMBER) | .fieldValueByName.name // \"(unset)\""
+    items | awk -F'|' -v n="$2" '$1==n { print $3; exit }'
     ;;
   list)
-    # The targeted query (1 GraphQL point) rather than `gh project item-list`
-    # (~100 points a call), so a loop can afford it.
-    gh api graphql -f query="{ user(login:\"$PROJECT_OWNER\"){ projectV2(number: $PROJECT_NUMBER){ items(first:100){ nodes{
-        content{ ... on Issue { number } }
-        fieldValueByName(name:\"Status\"){ ... on ProjectV2ItemFieldSingleSelectValue { name } } } } } } }" \
-      --jq ".data.user.projectV2.items.nodes[] | select(.fieldValueByName.name==\"$2\") | .content.number // empty" | sort -n
+    items | awk -F'|' -v s="$2" '$3==s { print $1 }' | sort -n
     ;;
   states)
     gh api graphql -f query="{ user(login:\"$PROJECT_OWNER\"){ projectV2(number: $PROJECT_NUMBER){

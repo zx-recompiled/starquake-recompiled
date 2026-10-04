@@ -54,7 +54,7 @@ issue attachments.
 ## Step 3: embed with exactly this URL form
 
 ```markdown
-![mockup](https://github.com/starquake/starquake-recompiled/raw/<branch>/docs/mockups/<file>.png)
+![mockup](https://github.com/zx-recompiled/starquake-recompiled/raw/<branch>/docs/mockups/<file>.png)
 ```
 
 This repo is public, so `raw.githubusercontent.com` would also render. Use the

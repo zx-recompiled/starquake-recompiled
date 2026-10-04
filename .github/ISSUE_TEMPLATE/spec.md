@@ -60,7 +60,7 @@ labels: 'needs: spec'
      the real UI is built (the `mockup` skill). Anything the Spectrum itself
      draws is mocked up as a real 256x192 screenshot, not an HTML sketch.
      Embed it with this form:
-     ![mockup](https://github.com/starquake/starquake-recompiled/raw/<branch>/docs/mockups/<file>.png)
+     ![mockup](https://github.com/zx-recompiled/starquake-recompiled/raw/<branch>/docs/mockups/<file>.png)
      The PR that merges it repoints the embed to /raw/main/. -->
 
 ### Fidelity

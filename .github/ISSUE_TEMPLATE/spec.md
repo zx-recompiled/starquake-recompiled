@@ -65,10 +65,11 @@ labels: 'needs: spec'
 
 ### Fidelity
 
-<!-- Can this move any of the 25 differential suites, or the 1335-case Z80
-     corpus? If so, say why that is right BEFORE the work starts: a suite is
-     never adjusted to make a change pass. Does the work need the game or the
-     ROM in assets/, which CI has not got? -->
+<!-- Can this move any of the 25 differential suites, or the Z80
+     conformance tests (z80test and the Fuse corpus)? If so, say why that
+     is right BEFORE the work starts: a suite is never adjusted to make a
+     change pass. Does the work need the game or the ROM in assets/, which
+     CI has not got? -->
 
 ### Out of scope
 

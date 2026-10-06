@@ -62,10 +62,10 @@ maintainer's.
 - **Decisions**: numbered, each with its why. Anything unsettled is a question
   TO the maintainer. Never decide design direction yourself.
 - **Fidelity**: say whether the change can move any of the 25 differential
-  suites or the 1335-case Z80 corpus. If it can, the ticket says why that is
-  right before the work starts — a suite is never adjusted to make a change
-  pass. Say too whether it needs the game or ROM in `assets/`, which CI
-  has not got.
+  suites or the Z80 conformance tests (z80test and the Fuse corpus). If it
+  can, the ticket says why that is right before the work starts — a suite
+  is never adjusted to make a change pass. Say too whether it needs the game
+  or ROM in `assets/`, which CI has not got.
 - **Open questions end with a copy-paste answer block.** One line per
   question, the options inline, and **every line carrying a `(rec)`**:
 

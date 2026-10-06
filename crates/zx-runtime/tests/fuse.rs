@@ -4,9 +4,12 @@
 //! Every other check in this project compares the rewritten game against this
 //! interpreter, and the rewrite was built by checking against it. So a wrong
 //! opcode here would be copied into the rewrite and every suite would still
-//! pass. This is the one test that does not rest on our own work: it runs the
-//! Z80 test corpus written for the Fuse emulator, which states for 1335 cases
-//! what the registers, memory and T-state count should be afterwards.
+//! pass. This test and `tests/z80test.rs` are the ones that do not rest on our
+//! own work. This one runs the Z80 test corpus written for the Fuse emulator,
+//! which states for 1335 cases what the registers, memory and T-state count
+//! should be afterwards. It is Fuse's model rather than measurements, so where
+//! z80test, which is measured, shows it wrong, the case is listed in
+//! [`KNOWN_WRONG`]; it is kept for timing, which z80test does not check.
 //!
 //! The corpus is not in this repository, for the same reason the game and the
 //! ROM are not. See `assets/README.md` for where to get it; without it this

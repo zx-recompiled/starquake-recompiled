@@ -16,8 +16,9 @@ beside the rewritten code and compares the result byte for byte.
   code, never on grepped output.**
 - `cargo run --release -p sq-verify -- all assets/starquake.tap assets/48.rom`
   runs the 30 differential suites on their own.
-- `cargo test -p zx-runtime --test fuse -- --nocapture` checks the interpreter
-  against the Fuse Z80 corpus (1335 cases).
+- `cargo test -p zx-runtime --test z80test --test fuse -- --nocapture` checks
+  the interpreter against z80test (measured on a real Spectrum) and the Fuse
+  Z80 corpus (1335 cases, for timing).
 - `cargo run --release --all-features -p starquake -- assets/starquake.tap`
   plays it. Add `--headless <frames> <dir>` for screenshots.
 - The tool shell is zsh: never name a variable `status`, and run anything
@@ -39,8 +40,12 @@ beside the rewritten code and compares the result byte for byte.
   to make it pass. The suites have twice rejected a plausible improvement, and
   both times they were right.
 - **The interpreter is not self-certified.** Everything else rests on it, so it
-  is checked against the Fuse corpus rather than against our own work. It must
-  stay at 1335/1335. The remaining gap is ULA contention (#32), and
+  is checked against outside references rather than against our own work:
+  z80test, measured on hardware, for flags and registers, and the Fuse corpus
+  for timing. All three z80test programs must pass, and the corpus must match
+  in every case but the six `KNOWN_WRONG` ones in `tests/fuse.rs`, each listed
+  with the z80test result that shows it wrong (#143). The remaining gap is ULA
+  contention (#32), and
   `README.md` says so rather than overclaiming.
 - **Fidelity first, and say so when it is not.** Where the rewrite cannot match
   the original exactly, the reason is written down (`README.md`, *Status*)

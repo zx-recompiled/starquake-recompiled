@@ -40,6 +40,12 @@ and whether training mode was on, are shown beside the game-over and
 high-score screens. The levels are ZX Sidekick's re-cut (#91), each adding
 to the ones below it:
 
+![The guidance panel at level 6, every guide on](docs/images/guidance-level6.png)
+
+*Level 6, every guide on: the core's pieces, every teleport's code and
+every door's key code cards, the whole planet with its items, and routes to
+a piece and to the core, with arrows at the picture's edge for the way out.*
+
 | level | | adds |
 |:-:|---|---|
 | 1 | Codes and the core | the codes of the teleports entered (#50) and each security door's key code cards once shown (#94), in a rail at the right, and the core's nine slots in the game's own pictures at the top left |
@@ -220,9 +226,11 @@ Starquake is copyright © 1985 Stephen Crow / Bubble Bus Software. This project
 is an independent reimplementation and is **not affiliated with, endorsed by,
 or approved by** the rights holders.
 
-It contains **no code, graphics, maps, text or sound from the original game**.
-All of that is read at startup from a copy of the original that you supply
-yourself, and the program will not run without one. The reverse-engineering
+The program contains **no code, graphics, maps, text or sound from the
+original game**. All of that is read at startup from a copy of the original
+that you supply yourself, and the program will not run without one. The
+documentation shows screenshots of the game as it plays; the screenshots are
+not data the game can be loaded from. The reverse-engineering
 notes in `docs/re` are descriptions in our own words; no disassembly of the
 original is reproduced here.
 

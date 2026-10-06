@@ -847,6 +847,40 @@ impl Zx {
         self.out_block(0xFFFF)
     }
 
+    /// What a repeating block instruction does to the flags when it goes
+    /// round again, on top of what one iteration did.
+    ///
+    /// Bits 3 and 5 come from the high byte of `pc`, the instruction's own
+    /// address. The I/O instructions also change H and P/V. Found by David
+    /// Banks in 2018, as MAME implements it; z80test's `z80full` checks it.
+    pub fn block_repeat_flags(&mut self, op: BlockOp, pc: u16) {
+        use BlockOp::*;
+        self.f = (self.f & !(XF | YF)) | ((pc >> 8) as u8 & (XF | YF));
+        if !matches!(op.step_op(), Ini | Ind | Outi | Outd) {
+            return;
+        }
+        // The value of P/V changes by the parity of `x`.
+        let toggle = |f: &mut u8, x: u8| *f ^= (parity(x & 7) ^ PF) & PF;
+        let b = self.b;
+        if self.f & CF != 0 {
+            self.f &= !HF;
+            // N is bit 7 of the byte transferred.
+            if self.f & NF != 0 {
+                toggle(&mut self.f, b.wrapping_sub(1));
+                if b & 0x0F == 0x00 {
+                    self.f |= HF;
+                }
+            } else {
+                toggle(&mut self.f, b.wrapping_add(1));
+                if b & 0x0F == 0x0F {
+                    self.f |= HF;
+                }
+            }
+        } else {
+            toggle(&mut self.f, b);
+        }
+    }
+
     pub fn block(&mut self, op: BlockOp) -> bool {
         use BlockOp::*;
         match op.step_op() {

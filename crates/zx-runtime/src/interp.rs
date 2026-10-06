@@ -340,6 +340,7 @@ fn execute(z: &mut Zx, d: &Decoded, pc: u16, next: u16) {
             if again {
                 z.pc = pc;
                 z.wz = pc.wrapping_add(1);
+                z.block_repeat_flags(op, pc);
             }
         }
         Im(m) => z.im = m,

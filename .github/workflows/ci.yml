@@ -115,16 +115,58 @@ jobs:
             207dc604db5d2a0a49ebd40e1bcb985a919e7a6e3dea1a52884ee05f9a1bf005 assets/tests.expected \
             | $check
 
+      # z80test (raxoft, MIT) is measured on a real Spectrum, so it is the
+      # authority on flags and registers; the Fuse corpus above is kept for
+      # timing. Its tapes would trip the no-game-data guard, so they are
+      # fetched from the v1.2a release like the corpus, and cached by pin.
+      - name: Cache z80test
+        id: z80test
+        uses: actions/cache@v4
+        with:
+          path: |
+            assets/z80full.tap
+            assets/z80ccf.tap
+            assets/z80memptr.tap
+          key: z80test-1.2a-cdfebeff-a35b3b26-444582dd
+
+      - name: Fetch z80test
+        if: steps.z80test.outputs.cache-hit != 'true'
+        run: |
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/z80test.zip" \
+            https://github.com/raxoft/z80test/releases/download/v1.2a/z80test-1.2a.zip
+          unzip -j -o "$RUNNER_TEMP/z80test.zip" \
+            z80test-1.2a/z80full.tap z80test-1.2a/z80ccf.tap z80test-1.2a/z80memptr.tap \
+            -d assets
+
+      # Verified on both paths, as the corpus is.
+      - name: Verify z80test
+        run: |
+          if command -v sha256sum > /dev/null; then
+            check="sha256sum -c -"
+          else
+            check="shasum -a 256 -c -"
+          fi
+          printf '%s  %s\n' \
+            cdfebeff306e5c0756ecb3295a1aebb8e71c336b2de35ecc3c0397146d73813c assets/z80full.tap \
+            a35b3b269b58371015cf033f28a08ad1ac92cce6dd27b428caf67b7f9ce8f5b7 assets/z80ccf.tap \
+            444582ddfa4d05711b6235e743ddf68295231e97ba92cc838c5d09a106c9a10f assets/z80memptr.tap \
+            | $check
+
       - name: Test
         run: cargo test --workspace --locked
 
-      # The conformance test passes when the corpus is absent, so prove it
-      # actually ran rather than trusting that the step above worked.
+      # The conformance tests pass when their files are absent, so prove they
+      # actually ran rather than trusting that the steps above worked. That
+      # the right cases match, and exactly the corpus's known-wrong ones
+      # differ, is the tests' own job.
       - name: Z80 conformance ran
         run: |
-          cargo test -p zx-runtime --test fuse --locked -- --nocapture \
-            | tee /tmp/fuse.log
-          grep -q '1335/1335 cases match' /tmp/fuse.log
+          cargo test -p zx-runtime --test fuse --test z80test --locked -- --nocapture \
+            | tee /tmp/z80.log
+          grep -q '/1335 cases match' /tmp/z80.log
+          for v in z80full z80ccf z80memptr; do
+            grep -q "z80test $v: [0-9]*/160 tests pass" /tmp/z80.log
+          done
 
       - name: Formatting
         run: cargo fmt --all --check

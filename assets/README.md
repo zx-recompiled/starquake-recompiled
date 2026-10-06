@@ -9,11 +9,12 @@ ignored by git):
 | `starquake.tap` | Starquake (Bubble Bus, 1985), `.tap` tape, SHA-1 `65450d6f33692c2c2868c0b497037f2cfd0ef3bd` | the game |
 | `48.rom` | ZX Spectrum 48K ROM, SHA-1 `5ea7c2b824672e914525d1d5c419d71b84a426a2` | development tools only (the reference interpreter) |
 | `tests.in`, `tests.expected` | The Fuse project's Z80 test corpus | development tools only (the processor conformance test) |
+| `z80full.tap`, `z80ccf.tap`, `z80memptr.tap` | Patrik Rak's z80test, v1.2a | development tools only (the processor conformance test) |
 
 **Only `starquake.tap` is needed to play.** The ROM is used by `sq-verify`,
 which runs the original from the same tape and compares the rewrite against
-it, and the corpus by the processor test; you can ignore them unless you are
-working on the code.
+it, and the corpus and z80test by the processor tests; you can ignore them
+unless you are working on the code.
 
 ## Where to get them
 
@@ -54,6 +55,17 @@ curl -L -o assets/tests.expected "$base/tests.expected?format=raw"
 
 Without them `cargo test` says the conformance test was skipped, and every
 other check still runs.
+
+**z80test.** Patrik Rak's Z80 tests, whose expected results were taken on a
+real Spectrum. MIT-licensed, but they are tapes, which this repository never
+carries, so they are fetched too:
+
+```sh
+curl -L -o z80test.zip https://github.com/raxoft/z80test/releases/download/v1.2a/z80test-1.2a.zip
+unzip -j z80test.zip z80test-1.2a/z80full.tap z80test-1.2a/z80ccf.tap z80test-1.2a/z80memptr.tap -d assets
+```
+
+Without them `cargo test` says the z80test checks were skipped.
 
 ## Why a tape rather than a snapshot
 

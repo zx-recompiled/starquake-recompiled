@@ -150,20 +150,46 @@ was written by checking against that interpreter. An interpreter that got an
 opcode wrong would have had the mistake copied into the rewrite, and every
 check above would still pass.
 
-The interpreter is therefore checked as well, against the
-[Fuse](https://fuse-emulator.sourceforge.net/) project's Z80 test corpus. It
-states for 1335 cases what the registers, memory and T-state count should be
-afterwards, undocumented behaviour included.
+The interpreter is therefore checked as well, against two outside
+references.
+
+**[z80test](https://github.com/raxoft/z80test)**, by Patrik Rak, is the
+authority on flags and registers. It runs every instruction over a large set
+of inputs and compares a checksum of the results with one taken on a real 48K
+Spectrum with a Zilog Z80. Three of its programs are run: `z80full` (every
+flag and register), `z80ccf` and `z80memptr`. The last two show two registers
+hidden inside the processor: Q, the flags the last instruction computed,
+which decides flag bits 3 and 5 after `SCF` and `CCF`; and MEMPTR, an
+internal address that decides them after `BIT n,(HL)`. All three pass, on a
+stand-in for the ROM, so they need no `48.rom`.
+
+**The [Fuse](https://fuse-emulator.sourceforge.net/) project's Z80 test
+corpus** states for 1335 cases what the registers, memory and T-state count
+should be afterwards. It describes Fuse's model rather than measurements, so
+it is kept for what z80test does not cover: the T-states and when each
+instruction touches the bus. Six of its cases expect behaviour z80test shows
+to be wrong (`SCF`, `CCF` and four `BIT n,(HL)`). They are listed in
+`tests/fuse.rs` with the evidence, and the test checks that exactly those
+differ.
 
 ```sh
-cargo test -p zx-runtime --test fuse -- --nocapture
+cargo test -p zx-runtime --test z80test --test fuse -- --nocapture
 ```
 
-It found three faults, none of which Starquake depended on:
-`BIT n,(IX+d)` took flag bits 3 and 5 from the byte tested instead of from
-the high byte of the address, `HALT` left PC past the instruction instead of
-on it, and writes below 0x4000 were dropped even with no ROM loaded. All
-1335 cases pass now.
+The corpus found three faults: `BIT n,(IX+d)` took flag bits 3 and 5 from
+the byte tested instead of from the high byte of the address, `HALT` left PC
+past the instruction instead of on it, and writes below 0x4000 were dropped
+even with no ROM loaded. z80test found three more (#143): no Q, no MEMPTR,
+and the flags of a repeating block instruction, which, when it goes round
+again, takes bits 3 and 5 from the high byte of its own address. Starquake
+depended on none of them, and every differential check came out the same
+after each fix.
+
+What z80test does not pin down is most of MEMPTR. Its own notes say its
+vectors were not designed to stress it, and with a fault planted in each of
+eight of MEMPTR's rules in turn, it caught two (`LD (nn),A`, and a repeating
+block instruction). The rest follow the published description of MEMPTR,
+unconfirmed. They matter only to flag bits 3 and 5 after `BIT n,(HL)`.
 
 The corpus does not check bus timing cycle by cycle: the contention pattern
 the ULA imposes while drawing the picture, which holds the processor off the
@@ -216,8 +242,9 @@ code, the notes in `docs/re`, the tests and the documentation.
 Reference material: the original program, disassembled by `zx-recomp`; the
 Z80 instruction set, including the undocumented flag behaviour; the
 [`.z80` format reference](https://worldofspectrum.org/faq/reference/z80format.htm);
-the [Fuse](https://fuse-emulator.sourceforge.net/) project's Z80 test corpus,
-which found three faults in the reference interpreter; and
+the [Fuse](https://fuse-emulator.sourceforge.net/) project's Z80 test corpus
+and Patrik Rak's [z80test](https://github.com/raxoft/z80test), which between
+them found six faults in the reference interpreter; and
 [World of Spectrum](https://worldofspectrum.net/) for the game and the ROM.
 
 ## Legal

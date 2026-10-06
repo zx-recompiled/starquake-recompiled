@@ -54,6 +54,26 @@ struct Case {
     events: Vec<(u32, String, u16)>,
 }
 
+/// Cases where the corpus is wrong about a real Z80, each with the evidence.
+///
+/// The corpus describes Fuse's model of the processor, not measurements.
+/// Where z80test (`tests/z80test.rs`), which is measured on a real Spectrum,
+/// shows the model wrong, the case is listed here rather than its expected
+/// values edited. The test checks that exactly these fail, so a new failure
+/// cannot hide among them.
+const KNOWN_WRONG: &[(&str, &str)] = &[
+    (
+        "37_1",
+        "SCF: bits 3 and 5 from A alone. From a fresh processor (Q = 0) a Zilog \
+         Z80 takes them from F | A (z80test z80ccf, and z80full test 001)",
+    ),
+    (
+        "3f",
+        "CCF: bits 3 and 5 from A alone. From a fresh processor (Q = 0) a Zilog \
+         Z80 takes them from F | A (z80test z80ccf, and z80full test 002)",
+    ),
+];
+
 /// What the Fuse test harness returns for a port read: the port's high byte.
 /// The real ULA is the machine's, not the processor's.
 fn port_in(port: u16) -> u8 {
@@ -404,17 +424,37 @@ fn matches_the_z80_test_corpus() {
     }
 
     let passed = cases.len() - failures.len();
-    println!("Z80 corpus: {passed}/{} cases match", cases.len());
-    if !failures.is_empty() {
-        for f in failures.iter().take(40) {
+    let is_known = |f: &String| {
+        KNOWN_WRONG
+            .iter()
+            .any(|(name, _)| f.split(':').next() == Some(*name))
+    };
+    let (known, unexpected): (Vec<String>, Vec<String>) = failures.into_iter().partition(is_known);
+    println!(
+        "Z80 corpus: {passed}/{} cases match; {} more are known to be wrong in the corpus",
+        cases.len(),
+        known.len()
+    );
+    for f in &known {
+        println!("  known wrong, {f}");
+    }
+    // Listed but now matching: the list is stale, or the interpreter has gone
+    // back to the corpus's model.
+    let stale: Vec<&str> = KNOWN_WRONG
+        .iter()
+        .map(|(name, _)| *name)
+        .filter(|name| !known.iter().any(|f| f.split(':').next() == Some(*name)))
+        .collect();
+    if !unexpected.is_empty() || !stale.is_empty() {
+        for f in unexpected.iter().take(40) {
             println!("  {f}");
         }
-        if failures.len() > 40 {
-            println!("  ... and {} more", failures.len() - 40);
+        if unexpected.len() > 40 {
+            println!("  ... and {} more", unexpected.len() - 40);
         }
         panic!(
-            "{} of {} Z80 conformance cases differ",
-            failures.len(),
+            "{} of {} Z80 conformance cases differ; listed as known wrong but matching: {stale:?}",
+            unexpected.len(),
             cases.len()
         );
     }

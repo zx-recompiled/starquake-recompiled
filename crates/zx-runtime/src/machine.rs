@@ -70,6 +70,13 @@ pub struct Zx {
     /// Set when the last executed instruction was EI: interrupts are not
     /// accepted until one more instruction has run.
     pub ei_delay: bool,
+    /// Q: the flags the last instruction wrote, or 0 if it wrote none.
+    ///
+    /// Internal to the processor and seen only through `SCF` and `CCF`, which
+    /// on a Zilog Z80 take flag bits 3 and 5 from `(Q ^ F) | A` (found in
+    /// 2012; David Banks, "Undocumented Flags", hoglet67/Z80Decoder wiki).
+    /// z80test's `z80ccf` checks it. Set by [`crate::interp::step`].
+    pub q: u8,
 
     /// T-states since the start of the current frame.
     pub t: u32,
@@ -139,6 +146,7 @@ impl Zx {
             im: state.im,
             halted: false,
             ei_delay: false,
+            q: 0,
             t: 0,
             mem,
             rom_loaded: rom.is_some(),
@@ -540,13 +548,19 @@ impl Zx {
         self.a = self.sub8(v, 0);
     }
 
+    /// Flag bits 3 and 5 of `SCF` and `CCF`, which depend on [`Zx::q`].
+    #[inline]
+    fn scf_ccf_undocumented(&self) -> u8 {
+        ((self.q ^ self.f) | self.a) & (XF | YF)
+    }
+
     pub fn scf(&mut self) {
-        self.f = (self.f & (SF | ZF | PF)) | (self.a & (XF | YF)) | CF;
+        self.f = (self.f & (SF | ZF | PF)) | self.scf_ccf_undocumented() | CF;
     }
 
     pub fn ccf(&mut self) {
         let hc = if self.f & CF != 0 { HF } else { CF };
-        self.f = (self.f & (SF | ZF | PF)) | (self.a & (XF | YF)) | hc;
+        self.f = (self.f & (SF | ZF | PF)) | self.scf_ccf_undocumented() | hc;
     }
 
     pub fn rlca(&mut self) {
@@ -923,6 +937,7 @@ impl Zx {
             self.pc = self.pc.wrapping_add(1);
         }
         self.halted = false;
+        self.q = 0;
         self.di();
         self.push(self.pc);
         if self.im == 2 {

@@ -56,6 +56,41 @@ pub fn step(z: &mut Zx) {
         z.charge(c);
     }
     execute(z, &d, pc, next);
+    z.q = if writes_flags(&d.instr) { z.f } else { 0 };
+}
+
+/// Whether an instruction computes new flags, which is what sets Q.
+///
+/// Loading F wholesale (`POP AF`, `EX AF,AF'`) does not count: z80test's
+/// `z80ccf` shows Q is 0 after those.
+fn writes_flags(i: &Instr) -> bool {
+    use Instr::*;
+    matches!(
+        i,
+        Alu(..)
+            | Inc8(_)
+            | Dec8(_)
+            | Add16(..)
+            | Adc16(_)
+            | Sbc16(_)
+            | Daa
+            | Cpl
+            | Neg
+            | Ccf
+            | Scf
+            | Rlca
+            | Rrca
+            | Rla
+            | Rra
+            | Rld
+            | Rrd
+            | Rot(..)
+            | Bit(..)
+            | InC(_)
+            | Block(_)
+            | LdAI
+            | LdAR
+    )
 }
 
 /// Carries out the instruction. The timing has already been charged, cycle by

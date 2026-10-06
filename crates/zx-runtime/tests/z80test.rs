@@ -113,7 +113,7 @@ fn run(variant: &str) -> Option<Outcome> {
     let path = tapes().join(format!("{variant}.tap"));
     let Ok(bytes) = std::fs::read(&path) else {
         println!(
-            "skipped: no {} ; see assets/README.md for where to get z80test",
+            "skipped: no {}; see assets/README.md for where to get z80test",
             path.display()
         );
         return None;

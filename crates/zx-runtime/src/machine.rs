@@ -77,6 +77,14 @@ pub struct Zx {
     /// 2012; David Banks, "Undocumented Flags", hoglet67/Z80Decoder wiki).
     /// z80test's `z80ccf` checks it. Set by [`crate::interp::step`].
     pub q: u8,
+    /// MEMPTR (also called WZ): an address the processor keeps internally.
+    ///
+    /// Seen only through `BIT n,(HL)`, which takes flag bits 3 and 5 from its
+    /// high byte. Which instructions set it, and to what, is from "MEMPTR,
+    /// esoteric register of the Zilog Z80" (boo_boo and Vladimir Kladov),
+    /// with David Banks's 2018 findings for repeating block instructions.
+    /// z80test's `z80memptr` checks it. Set by [`crate::interp::step`].
+    pub wz: u16,
 
     /// T-states since the start of the current frame.
     pub t: u32,
@@ -147,6 +155,7 @@ impl Zx {
             halted: false,
             ei_delay: false,
             q: 0,
+            wz: 0,
             t: 0,
             mem,
             rom_loaded: rom.is_some(),
@@ -949,5 +958,6 @@ impl Zx {
             self.pc = 0x0038;
             self.step(13, 1);
         }
+        self.wz = self.pc;
     }
 }

@@ -72,6 +72,26 @@ const KNOWN_WRONG: &[(&str, &str)] = &[
         "CCF: bits 3 and 5 from A alone. From a fresh processor (Q = 0) a Zilog \
          Z80 takes them from F | A (z80test z80ccf, and z80full test 002)",
     ),
+    (
+        "cb4e",
+        "BIT 1,(HL): bits 3 and 5 from the byte tested. A Z80 takes them from \
+         MEMPTR's high byte, 0 here (z80test z80memptr, and z80full test 071)",
+    ),
+    (
+        "cb5e",
+        "BIT 3,(HL): bits 3 and 5 from the byte tested. A Z80 takes them from \
+         MEMPTR's high byte, 0 here (z80test z80memptr, and z80full test 071)",
+    ),
+    (
+        "cb6e",
+        "BIT 5,(HL): bits 3 and 5 from the byte tested. A Z80 takes them from \
+         MEMPTR's high byte, 0 here (z80test z80memptr, and z80full test 071)",
+    ),
+    (
+        "cb76",
+        "BIT 6,(HL): bits 3 and 5 from the byte tested. A Z80 takes them from \
+         MEMPTR's high byte, 0 here (z80test z80memptr, and z80full test 071)",
+    ),
 ];
 
 /// What the Fuse test harness returns for a port read: the port's high byte.

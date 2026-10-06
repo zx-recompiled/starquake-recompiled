@@ -25,9 +25,15 @@ beside the rewritten code and compares the result byte for byte.
 
 ## Invariants
 
-- **No game or ROM data is ever committed.** `assets/` is ignored except its
-  README, and CI has a job that fails if anything slips through. This is what
-  makes the project legal to publish; nothing is worth breaking it for.
+- **No game or ROM data is ever committed.** That means what the game is
+  loaded from: tapes, snapshots and ROMs, and graphics, maps, text or sound
+  extracted from them as files. `assets/` is ignored except its README, and
+  CI has a job that fails if anything slips through. This is what makes the
+  project legal to publish; nothing is worth breaking it for.
+  **Screenshots of the game are fine to commit** (the maintainer's call,
+  #140): a picture of the screen in the README, the docs or a mockup is not
+  data the game can be loaded from. Keep to the pictures a page needs, not a
+  gallery of the game.
 - **The differential suites are the contract.** All 30 must match. A change
   that moves one is a deliberate, called-out decision, never a check adjusted
   to make it pass. The suites have twice rejected a plausible improvement, and

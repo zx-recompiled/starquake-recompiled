@@ -2217,7 +2217,7 @@ mod render_check {
         ];
         let mut panel = Panel::new();
         // With `SQ_TAPE` naming the player's tape, every case is drawn in the
-        // game's own letters, for looking at, never for committing.
+        // game's own letters.
         let letters = std::env::var_os("SQ_TAPE").map(|tape| {
             let (memory, _) =
                 starquake::assets::read_game(std::path::Path::new(&tape)).expect("read the tape");

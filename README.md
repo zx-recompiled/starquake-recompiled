@@ -228,9 +228,11 @@ Starquake is copyright © 1985 Stephen Crow / Bubble Bus Software. This project
 is an independent reimplementation and is **not affiliated with, endorsed by,
 or approved by** the rights holders.
 
-It contains **no code, graphics, maps, text or sound from the original game**.
-All of that is read at startup from a copy of the original that you supply
-yourself, and the program will not run without one. The reverse-engineering
+The program contains **no code, graphics, maps, text or sound from the
+original game**. All of that is read at startup from a copy of the original
+that you supply yourself, and the program will not run without one. The
+documentation shows screenshots of the game as it plays; the screenshots are
+not data the game can be loaded from. The reverse-engineering
 notes in `docs/re` are descriptions in our own words; no disassembly of the
 original is reproduced here.
 

@@ -447,11 +447,13 @@ fn matches_the_z80_test_corpus() {
     }
 
     let passed = cases.len() - failures.len();
-    let is_known = |f: &String| {
+    let why = |f: &String| {
         KNOWN_WRONG
             .iter()
-            .any(|(name, _)| f.split(':').next() == Some(*name))
+            .find(|(name, _)| f.split(':').next() == Some(*name))
+            .map(|(_, why)| *why)
     };
+    let is_known = |f: &String| why(f).is_some();
     let (known, unexpected): (Vec<String>, Vec<String>) = failures.into_iter().partition(is_known);
     println!(
         "Z80 corpus: {passed}/{} cases match; {} more are known to be wrong in the corpus",
@@ -460,6 +462,7 @@ fn matches_the_z80_test_corpus() {
     );
     for f in &known {
         println!("  known wrong, {f}");
+        println!("    {}", why(f).unwrap_or_default());
     }
     // Listed but now matching: the list is stale, or the interpreter has gone
     // back to the corpus's model.

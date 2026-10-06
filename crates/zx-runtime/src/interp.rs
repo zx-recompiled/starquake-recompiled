@@ -254,9 +254,6 @@ fn execute(z: &mut Zx, d: &Decoded, pc: u16, next: u16) {
             }
             z.wz = indexed(z, o).unwrap_or(z.wz);
         }
-        // A relative jump differs from an absolute one only in how the
-        // target was decoded and what it costs, and the cost is already
-        // charged, so what is left is the same.
         // An absolute jump or call sets MEMPTR to its target whether it is
         // taken or not; a relative one only when taken.
         Jp(c, a) => {

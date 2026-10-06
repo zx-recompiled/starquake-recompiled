@@ -83,7 +83,9 @@ pub struct Zx {
     /// high byte. Which instructions set it, and to what, is from "MEMPTR,
     /// esoteric register of the Zilog Z80" (boo_boo and Vladimir Kladov),
     /// with David Banks's 2018 findings for repeating block instructions.
-    /// z80test's `z80memptr` checks it. Set by [`crate::interp::step`].
+    /// z80test's `z80memptr` checks only part of it: of eight of these rules
+    /// broken in turn, it caught two (README, *What the reference interpreter
+    /// rests on*). Set by [`crate::interp::step`].
     pub wz: u16,
 
     /// T-states since the start of the current frame.

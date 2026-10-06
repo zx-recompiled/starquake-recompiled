@@ -126,9 +126,9 @@ fn run(variant: &str) -> Option<Outcome> {
     // Called like `RANDOMIZE USR 32768`, returning to a sentinel.
     z.push(SENTINEL);
     let mut screen = Screen::default();
-    // The whole run is a few billion T-states on a real Spectrum, so the
-    // limit is generous; it only stops a run that has lost its way.
-    let mut left: u64 = 50_000_000_000;
+    // z80full, the longest, runs about 190 million instructions. The limit
+    // only stops a run that has lost its way.
+    let mut left: u64 = 1_000_000_000;
     loop {
         if z.pc == RST_10 {
             screen.print(z.a);

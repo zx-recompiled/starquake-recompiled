@@ -1929,6 +1929,45 @@ mod render_check {
         let mut record = Guidance::default();
         record.set_level(3);
         record.set_training(true);
+        // Made-up routes: the piece's left and down out of the map walked,
+        // the core's down, both leaving left first.
+        let with_routes = |g: &mut Guidance| {
+            let here = g.room().unwrap();
+            let walk = |rooms: &[u16]| -> Vec<Step> {
+                rooms
+                    .iter()
+                    .map(|&room| Step {
+                        room,
+                        teleport: false,
+                    })
+                    .collect()
+            };
+            let piece = walk(&[here - 1, here - 2, here + 14, here + 30]);
+            let core = walk(&[here - 1, here + 15, here + 31, here + 47]);
+            let door = g.doors_for_test().first().map(|d| d.room);
+            g.set_routes(Some(piece), Some(core), [door, None]);
+            g.set_piece_choice(Some(here + 30), (2, 3));
+        };
+        // Level 6, with every code and door: made-up teleports and doors
+        // added to those seen, which are read before the level changes.
+        let level6 = |g: &mut Guidance| {
+            let mut every = g.codes().0.to_vec();
+            g.set_level(6);
+            for (k, room) in [40u16, 77, 150, 233, 301, 402, 11, 22, 33, 44, 55, 66]
+                .into_iter()
+                .enumerate()
+            {
+                every.push(SeenTeleporter {
+                    room,
+                    code: [b'A' + (15 + k as u8) % 26, b'Q', b'R', b'S', b'T'],
+                });
+            }
+            let mut doors = g.doors_for_test().to_vec();
+            for room in [90u16, 120, 260, 300, 380, 420] {
+                doors.push(DoorCode { room, ..doors[1] });
+            }
+            g.set_every(every, doors);
+        };
         let cases = [
             ("level0", Guidance::default(), Scene::Play),
             ("level2", level2, Scene::Play),
@@ -1939,23 +1978,7 @@ mod render_check {
                 {
                     let mut g = level3.clone();
                     g.set_level(5);
-                    let here = g.room().unwrap();
-                    let walk = |rooms: &[u16]| -> Vec<Step> {
-                        rooms
-                            .iter()
-                            .map(|&room| Step {
-                                room,
-                                teleport: false,
-                            })
-                            .collect()
-                    };
-                    // Made-up routes: the piece's left and down out of the
-                    // map walked, the core's down, both leaving left first.
-                    let piece = walk(&[here - 1, here - 2, here + 14, here + 30]);
-                    let core = walk(&[here - 1, here + 15, here + 31, here + 47]);
-                    let door = g.doors_for_test().first().map(|d| d.room);
-                    g.set_routes(Some(piece), Some(core), [door, None]);
-                    g.set_piece_choice(Some(here + 30), (2, 3));
+                    with_routes(&mut g);
                     g
                 },
                 Scene::Play,
@@ -1964,22 +1987,19 @@ mod render_check {
                 "level6",
                 {
                     let mut g = level3.clone();
-                    let mut every = g.codes().0.to_vec();
-                    g.set_level(6);
-                    for (k, room) in [40u16, 77, 150, 233, 301, 402, 11, 22, 33, 44, 55, 66]
-                        .into_iter()
-                        .enumerate()
-                    {
-                        every.push(SeenTeleporter {
-                            room,
-                            code: [b'P' + k as u8, b'Q', b'R', b'S', b'T'],
-                        });
-                    }
-                    let mut doors = g.doors_for_test().to_vec();
-                    for room in [90u16, 120, 260, 300, 380, 420] {
-                        doors.push(DoorCode { room, ..doors[1] });
-                    }
-                    g.set_every(every, doors);
+                    level6(&mut g);
+                    g
+                },
+                Scene::Play,
+            ),
+            (
+                // Every guide on, for the README (#140): level 6 with level
+                // 5's routes.
+                "level6-routes",
+                {
+                    let mut g = level3.clone();
+                    level6(&mut g);
+                    with_routes(&mut g);
                     g
                 },
                 Scene::Play,

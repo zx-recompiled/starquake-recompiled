@@ -42,11 +42,9 @@ to the ones below it:
 
 ![The guidance panel at level 6, every guide on](docs/images/guidance-level6.png)
 
-*Level 6, every guide on: the codes, the core, the whole map with its
-items, and routes to a piece and to the core, with arrows at the picture's
-edge for the way out. Drawn by the panel's render test, so the picture is a
-grey stand-in, the map and codes are made up, and the items and the core's
-pieces are drawn shapes: the game's own pictures stay out of the repository.*
+*Level 6, every guide on: the core's pieces, every teleport's code and
+every door's key code cards, the whole planet with its items, and routes to
+a piece and to the core, with arrows at the picture's edge for the way out.*
 
 | level | | adds |
 |:-:|---|---|
